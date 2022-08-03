@@ -106,7 +106,7 @@ export default CustomLayout;
 
 ### Using Custom Icons for Resources
 
-For icons, `ra-treemenu` depends upon [material-ui](https://material-ui.com/components/material-icons/) and the defaults for the resources are:
+For icons, `ra-treemenu` depends upon [mui](https://material-ui.com/components/material-icons/) and the defaults for the resources are:
 1. `ViewListIcon`: For all child resources.
 2. `Label`: For all parent resources (non-routing).
 

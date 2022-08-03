@@ -1,31 +1,26 @@
-import React, { useState } from 'react';
-import LabelIcon from '@material-ui/icons/Label';
-import { useMediaQuery } from '@material-ui/core';
-import { makeStyles } from '@material-ui/core/styles';
-import {
-    MenuItemLink,
-    getResources,
-    useTranslate,
-    DashboardMenuItem
-} from 'react-admin';
-import PropTypes from 'prop-types';
-import { useSelector, shallowEqual } from 'react-redux';
-import classnames from 'classnames';
-import DefaultIcon from '@material-ui/icons/ViewList';
-import CustomMenuItem from './CustomMenuItem';
+import React, {useState} from "react";
+import LabelIcon from "@mui/icons-material/Label";
+import {useMediaQuery} from "@mui/material";
+import {makeStyles} from "@mui/material/styles";
+import {DashboardMenuItem, MenuItemLink, useResourceDefinitions, useTranslate} from "react-admin";
+import PropTypes from "prop-types";
+import {useSelector} from "react-redux";
+import classnames from "classnames";
+import DefaultIcon from "@mui/icons-material/ViewList";
+import CustomMenuItem from "./CustomMenuItem";
 
 const useStyles = makeStyles(
     theme => ({
         main: {
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'flex-start',
-            marginTop: '0.5em',
-            [theme.breakpoints.only('xs')]: {
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "flex-start",
+            marginTop: "0.5em",
+            [theme.breakpoints.only("xs")]: {
                 marginTop: 0,
             },
-            [theme.breakpoints.up('md')]: {
-                marginTop: '1.5em',
+            [theme.breakpoints.up("md")]: {
+                marginTop: "1.5em",
             },
             transition: theme.transitions.create("width", {
                 easing: theme.transitions.easing.sharp,
@@ -39,7 +34,7 @@ const useStyles = makeStyles(
             width: 55,
         },
     }),
-    { name: 'RaTreeMenu' }
+    {name: "RaTreeMenu"}
 );
 
 const Menu = (props) => {
@@ -50,15 +45,19 @@ const Menu = (props) => {
         onMenuClick,
         logout,
         dashboardlabel,
-        resources,
         ...rest
     } = props;
+
+    const fetchResources = () => {
+        const resourcesDefinitions = useResourceDefinitions();
+        return Object.keys(resourcesDefinitions).map(name => resourcesDefinitions[name]);
+    };
 
     const classes = useStyles(props);
     const translate = useTranslate();
     const open = useSelector((state) => state.admin.ui.sidebarOpen);
     const pathname = useSelector((state) => state.router.location.pathname);
-    const resources = resources || useSelector(getResources, shallowEqual);
+    const resources = props.resources || fetchResources();
     const hasList = (resource) => (resource.hasList);
 
     const handleToggle = (parent) => {
@@ -66,21 +65,21 @@ const Menu = (props) => {
          * Handles toggling of parents dropdowns
          * for resource visibility
          */
-        setState(state => ({ [parent]: !state[parent] }));
+        setState(state => ({[parent]: !state[parent]}));
     };
 
     const isXSmall = useMediaQuery((theme) =>
         /**
          * This function is not directly used anywhere
          * but is required to fix the following error:
-         * 
+         *
          * Error: Rendered fewer hooks than expected.
          * This may be caused by an accidental early
          * return statement.
-         * 
+         *
          * thrown by RA at the time of rendering.
          */
-        theme.breakpoints.down('xs')
+        theme.breakpoints.down("xs")
     );
 
     const isParent = (resource) => (
@@ -89,7 +88,7 @@ const Menu = (props) => {
          * i.e. dummy resource for menu parenting
          */
         resource.options &&
-        resource.options.hasOwnProperty('isMenuParent') &&
+        resource.options.hasOwnProperty("isMenuParent") &&
         resource.options.isMenuParent
     );
 
@@ -99,11 +98,11 @@ const Menu = (props) => {
          * i.e. has no parents defined. Needed as
          * these resources are supposed to be rendered
          * as is
-         *  
+         *
          */
         resource.options &&
-        !resource.options.hasOwnProperty('menuParent') &&
-        !resource.options.hasOwnProperty('isMenuParent')
+        !resource.options.hasOwnProperty("menuParent") &&
+        !resource.options.hasOwnProperty("isMenuParent")
     );
 
     const isChildOfParent = (resource, parentResource) => (
@@ -112,30 +111,33 @@ const Menu = (props) => {
          * mapped child of the parentResource
          */
         resource.options &&
-        resource.options.hasOwnProperty('menuParent') &&
-        resource.options.menuParent == parentResource.name
+        resource.options.hasOwnProperty("menuParent") &&
+        resource.options.menuParent === parentResource.name
     );
     const geResourceName = (slug) => {
-        if (!slug) return;
-        var words = slug.toString().split('_');
+        if (!slug) {
+            return;
+        }
+        var words = slug.toString().split("_");
         for (var i = 0; i < words.length; i++) {
             var word = words[i];
             words[i] = word.charAt(0).toUpperCase() + word.slice(1);
         }
-        return words.join(' ');
-    }
+        return words.join(" ");
+    };
 
     const getPrimaryTextForResource = (resource) => {
-        let resourcename = '';
-        if (resource.options && resource.options.label)
+        let resourcename = "";
+        if (resource.options && resource.options.label) {
             resourcename = resource.options.label;
-        else if (resource.name) {
+        } else if (resource.name) {
             resourcename = translate(`resources.${resource.name}.name`);
-            if (resourcename.startsWith('resources.'))
+            if (resourcename.startsWith("resources.")) {
                 resourcename = geResourceName(resource.name);
+            }
         }
         return resourcename;
-    }
+    };
 
     const MenuItem = (resource) => (
         /**
@@ -184,7 +186,6 @@ const Menu = (props) => {
      */
     const mapIndependent = (independentResource) => hasList(independentResource) && MenuItem(independentResource);
 
-
     /**
      * Initialising the initialExpansionState and
      * active parent resource name at the time of
@@ -200,7 +201,7 @@ const Menu = (props) => {
     resources.forEach(resource => {
         if (isParent(resource)) {
             initialExpansionState[resource.name] = false;
-        } else if (pathname.startsWith(`/${resource.name}`) && resource.options.hasOwnProperty('menuParent')) {
+        } else if (pathname.startsWith(`/${resource.name}`) && resource.options.hasOwnProperty("menuParent")) {
             parentActiveResName = resource.options.menuParent;
         }
     });
@@ -218,8 +219,12 @@ const Menu = (props) => {
      * for rendering in the order we find them declared in
      */
     resources.forEach(r => {
-        if (isParent(r)) resRenderGroup.push(mapParentStack(r));
-        if (isOrphan(r)) resRenderGroup.push(mapIndependent(r));
+        if (isParent(r)) {
+            resRenderGroup.push(mapParentStack(r));
+        }
+        if (isOrphan(r)) {
+            resRenderGroup.push(mapIndependent(r));
+        }
     });
 
     return (
@@ -243,7 +248,7 @@ const Menu = (props) => {
             </div>
         </div>
     );
-}
+};
 
 Menu.propTypes = {
     classes: PropTypes.object,
@@ -252,14 +257,13 @@ Menu.propTypes = {
     hasDashboard: PropTypes.bool,
     logout: PropTypes.element,
     onMenuClick: PropTypes.func,
-    dashboardlabel:PropTypes.string,
-    resources:PropTypes.array,
+    dashboardlabel: PropTypes.string,
+    resources: PropTypes.array,
 };
 
 Menu.defaultProps = {
     onMenuClick: () => null,
-    dashboardlabel: 'Dashboard'
+    dashboardlabel: "Dashboard"
 };
-
 
 export default Menu;
